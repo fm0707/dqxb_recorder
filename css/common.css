@@ -1,0 +1,69 @@
+h1 {
+background-color: #f6f6f6;
+border-radius: 6px;
+font-size:14px;
+}
+
+textarea {
+width:100%
+
+}
+
+#graph-area{
+width:95%;
+margin-top:10px;
+
+
+}
+
+#graph-bydate {
+width: 95%; 
+height: 300px
+
+}
+
+#graph-above{
+margin-top:10px;
+}
+#average-rate {
+margin-top:10px;
+font-size:24px;
+
+}
+#graph-description {
+margin-top:10px;
+
+
+
+}
+#target_date {
+
+background-color: #d555ff;
+}
+
+#job {
+
+
+}
+#selectResult {
+
+border:1px;
+
+
+
+
+}
+#won ,#lost{
+
+
+}
+.clear {
+clear:both;
+
+}
+
+
+svg {
+    width: 95% !important;
+    height: 120%; !important;
+}
