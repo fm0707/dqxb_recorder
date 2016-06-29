@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="description" content="ドラクエ10　コロシアムの勝敗を記録し、勝率をグラフ表示します。">
+<title>ドラクエ10　コロシアム勝敗記録ツール</title>
+
+</head>
+
+<body>
+<div id="app">
+<!-- navi-area start-->
+
+<div class="container-fluid">
+    <nav class="navbar navbar-default">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbarEexample8">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">
+				DQ10コロシアム勝敗記録ツール
+			</a>
+		</div>
+		
+		<div class="collapse navbar-collapse" id="navbarEexample8">
+			<ul class="nav navbar-nav nav-tabs">
+				<li class="active"><a href="#input-result" data-toggle="tab">勝敗登録</a></li>
+				<li><a href="#result-graph" data-toggle="tab">グラフ設定</a></li>
+				<li><a href="#result-detail" data-toggle="tab">戦歴確認・削除</a></li>
+                                <li><a href="#result-output" data-toggle="tab">データ出力</a></li>
+                                <li><a href="#memo"  data-toggle="tab">メモ</a></li>
+                                <li><a href="#howto" data-toggle="tab">このツールについて</a></li>
+                                <li><a href="#bot" data-toggle="tab">人工知能とお話</a></li>
+			</ul>
+		</div>
+	</div>
+    </nav>
+
+    <!-- navi-area end-->
+   
+
+    <!-- タブ内容 -->
+    <div class="tab-content">
+
+    <div class="tab-pane active" id="input-result">
+    <div class="row">
+         <div class="col-xs-12">
+             <div class="alert alert-success" v-bind:class="{ 'invisible' : msgStat }" role="alert">{{msgContent}}</div>
+         </div>
+    </div>
+    <div class="row" >
+        <div class="col-xs-12">
+            <h1>コロシアムの勝率をグラフ表示します</h1>
+            <h6>6/22 update! 人工知能との会話機能を追加しました。</h6>
+        </div>
+    </div>
+    <div class="row bg-info" >
+        <div class="col-xs-6">
+            <div id="selectResult">
+                <button class="btn btn-lg btn-danger" id="won" v-on:click="addWon">
+                勝
+                </button>
+                <button class="btn btn-lg btn-primary" id="lost" v-on:click="addLost">
+                負
+                </button>
+            </div>
+        </div>
+        <div class="col-xs-6">
+              <label><input type="checkbox" class="form-control" v-model="isDuringGp">バトルグランプリ</label>
+        </div>
+    </div>
+    <div class="row  bg-info">
+        <div class="col-xs-7">
+            <div class="input-group date tab1">
+                <input type="text" id="battle-date" class="form-control" value={{battle_date}}  v-model="battleDate"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+            </div>
+        </div>
+        <div class="col-xs-5">
+            <div id="rank">
+                <ul class="list-unstyled">
+                    <li class="btn btn-default" v-bind:class="{ 'active' : rankSelectedStat[$index] }" v-for="rank in ranks" v-on:click="setRank($index)">
+                    {{rank}}
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+    <div class="row bg-info">
+        <div class="col-xs-12">
+	    <div id="job">
+                <ul class="list-unstyled">
+                    <li class="btn btn-info" v-bind:class="{ 'active' : jobSelectedStat[$index] }" v-for="job in jobs" v-on:click="setJob($index)">
+                    {{job}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="result-graph">
+    <div class="row bg-info">
+        <div class="col-xs-12">
+
+            <div class="form-group">
+                <label for="date-from">FROM</label>
+                <div class="input-group date from">
+                    <input type="text" id="date-from" class="form-control" value={{dateFrom}} v-model="dateFrom"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="date-to">TO</label>
+                <div class="input-group date to">
+                    <input type="text" id="date-to" class="form-control" value={{dateTo}} v-model="dateTo"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                </div>
+            </div>
+            <button v-on:click="clearDateForGraph" class="btn btn-default btn-sm">日付クリア</button>
+            <div class="form-group">
+                <label for="sel-job">JOB</label>
+                <select id="sel-job" class="form-control" v-model="jobForGraph">
+                <option v-for="job in jobs" v-bind:value="job">
+                {{ job }}
+                </option>
+                </select>
+                <button v-on:click="clearJobForGraph" class="btn btn-default btn-sm">JOBクリア</button>
+            </div>
+            <div class="form-group">
+                <label for="sel-rank">RANK</label>
+                <select id="sel-rank" class="form-control" v-model="rankForGraph">
+                <option v-for="rank in ranks" v-bind:value="rank">
+                {{ rank }}
+                </option>
+                </select>
+                <button v-on:click="clearRankForGraph" class="btn btn-default btn-sm">RANKクリア</button>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" class="form-control" v-model="isDuringGpForGraph">バトルグランプリのフラグ有の試合を抽出</label>
+            </div>
+            <button v-on:click="reAggregateResult" class="btn btn-info btn">グラフ更新</button>
+        </div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="result-detail">
+    <div class="row">
+        <div class="col-xs-12 bg-info">
+        <button class="btn btn-danger" v-on:click="deleteAllResult">全削除</button>
+        <button class="btn btn-link" v-on:click="scrollToLatest">最新試合へ↓</button>
+
+            <div id="result">
+                <li class="list-group-item" v-for="result in results">
+                {{ (result.result==100) ? '【勝】':'【負】' }} 職：{{ result.job }}　ランク：{{ result.rank }} 日付：{{result.date}} {{ (result.gp.toString()=='true') ? '【GP中】':'' }}
+                <button v-on:click="remove($index)">X</button>
+                </li>
+            </div>
+            <div id="end-result-list">
+                <button class="btn btn-link" v-on:click="scrollToTop">ページ上へ↑</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="result-output">
+    <div class="row" >
+        <div class="col-xs-12">
+            <h1>CSV形式でデータを表示します。（日付,勝敗,職,ランク,バトルグランプリフラグ）</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 bg-info">
+            <div>日付で絞込み
+                <select v-model="selectedDate">
+                <option v-for="date in dateList" v-bind:value="date.date">
+                {{date.date}}
+                </option>
+                </select>
+                <button v-on:click="clearSelectedDate">クリア</button>
+            </div>
+            <div id="result2">
+                <li class="list-group-item" v-for="result in results | orderBy 'date','rank','job' | filterBy selectedDate in 'date'">
+                {{result.date}},{{ (result.result==100) ? '勝':'負' }},{{ result.job }},{{ result.rank }},{{result.gp}}
+            
+                </li>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="memo">
+    <div class="row">
+        <div class="col-xs-12 bg-info">
+            <button v-on:click="clearMemo">クリア</button>
+            <div id="memo-area">
+               <textarea v-model="memo" rows="30" maxlength="4000" placeholder="4/11 memo"></textarea>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="howto">
+    <div class="row">
+        <div class="col-xs-12 bg-info">
+        コロシアム勝敗記録ツール　β版<br><br>
+        推奨ブラウザ:InternetExplorer以外<br><br>
+        リリースログ：<br>
+         2016-03-29 version0.1 (β) リリース<br>
+         2016-04-01 version0.2 (β) グラフ表示不具合修正、試合数表示追加<br>
+         2016-04-04 version0.3 (β) 試合数をグラフに表示するよう変更・グラフ表示幅調整（スマホ対応）<br>
+         2016-04-11 version0.3.1 (β) グランプリ中の試合を抽出するための条件追加、戦歴画面のスクロールボタン追加<br>
+         2016-06-22 version0.3.2 (β) グランプリ中のストレス解消機能追加<br><br>
+        ・勝敗登録タブで、勝敗を登録してください。日付は必須項目です。<br>
+        ・戦歴タブで登録したデータを確認・削除できます。<br>
+        ・データはすべて使用中の端末に保存されます。
+        </div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="bot">
+    <div class="row" >
+        <div class="col-xs-12">
+            <h1>グランプリでイライラしたら、人工知能と話してみませんか?</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 bg-info">
+		<div class="panel panel-success">
+			<div class="panel-heading">あなた</div>
+			<div class="panel-body">
+				<input type="text" v-model="userChat"  width="100%">
+	        		<button type="button" v-on:click="sendToBot">話しかける</button>
+                                <div id="userchat">&nbsp;</div>
+			</div>
+		</div>
+	        
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 bg-info">
+        	
+                <div class="panel panel-warning">
+		  <div class="panel-heading">人工知能さん</div>
+		  <div class="panel-body"><div id="botchat">&nbsp;</div></div>
+		  
+		</div>
+        
+        </div>
+    </div>
+    </div>
+</div><!-- タブ内容ここまで -->
+</div><!-- コンテナここまで -->
+
+
+<div id="graph-above">
+    <div id="graph-description">{{graphDescription}}</div>
+    <div id="average-rate">勝率{{averageRate}}% 試合数{{battleCount}}</div>
+    
+</div>
+<div id="graph-area">
+    <div id="graph-bydate"></div>
+</div>
+
+</div>
+<div id="clear"></div>
+
+
+</body>
+<link rel="stylesheet"  href="css/morris.css">
+<link rel="stylesheet"  href="plugin/bootstrap-3.3.6-dist/css/bootstrap.min.css" >
+<link rel="stylesheet"  href="plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css">
+<link rel="stylesheet"  href="css/common.css">
+<script src="plugin/linq.js_ver2.2.0.2/linq.min.js"></script>
+<script src="plugin/vue.min.js"></script>
+<script src="plugin/jquery-1.12.2.min.js"></script>
+<script src="plugin/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+<script src="plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="plugin/raphael.min.js"></script>
+<script src="plugin/morris.min.js"></script>
+<script src="js/common.js"></script>
+<script src="js/jquery.xdomainajax.js"></script>
+</html>
